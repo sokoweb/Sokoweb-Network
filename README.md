@@ -5,7 +5,7 @@ A distributed commerce network for peer-to-peer product/service listings, search
 ## Quick Start
 
 ```bash
-pip install sokoweb==0.1.42
+pip install sokoweb
 sokoweb-up
 or sokoweb-up -d (detached mode)
 ```
