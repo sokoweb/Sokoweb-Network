@@ -81,9 +81,6 @@ We provide security updates for the following versions:
   - Affected versions
   - Credits to the reporter
 
-### Bug Bounty Program
-
-[If applicable, describe your bug bounty program here. If not, you can remove this section]
 
 ### Security Contacts
 
