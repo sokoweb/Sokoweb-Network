@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "sokoweb_db"
+      POSTGRES_PORT: "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - kademlia_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_PORT: "${NODE_PORT:-8000}"
+      NODE_TCP_PORT: "${NODE_TCP_PORT:-8500}"
+      ADVERTISE_IP: "${ADVERTISE_IP:-localhost}"
+
+      # If ADVERTISE_IP is "localhost", your CLI script will set BOOTSTRAP_NODES="" in .env
+      # so effectively it becomes an empty string here:
+      BOOTSTRAP_NODES: "${BOOTSTRAP_NODES}"
+
+      # Hard-coded or default values:
+      SECRET_KEY: "root"
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      ENCRYPTION_PASSWORD: "s3cr3t_p@ssw0rd"
+      MPESA_CONSUMER_KEY: "qKWanfm4aw1FoduqOGGDBdv0f7UJf8Li"
+      MPESA_CONSUMER_SECRET: "07QvgShVQBVRF0eE"
+      BUSINESS_SHORT_CODE: "6290257"
+      PASSKEY: "390a62dc3a65c889ce9275360b7ee8c875e115c2bb0e3a312446f9a9740fb20d"
+      CALLBACK_URL: "https://example.com"
+      TESTING: "false"
+      POSTGRES_HOST: "postgres"
+      IS_VALIDATOR: "true"
+
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}/tcp"
+      - "${NODE_PORT}:${NODE_PORT}/udp"
+      - "${NODE_TCP_PORT}:${NODE_TCP_PORT}/tcp"
+      - "${NODE_TCP_PORT}:${NODE_TCP_PORT}/udp"
+
+    expose:
+      - "${NODE_PORT}"
+      - "${NODE_TCP_PORT}"
+
+    networks:
+      - kademlia_network
+
+    volumes:
+      - node_data:/app/storage_chunks
+
+    command: >
+      bash -c "
+        python -m sokoweb.sokoweb.wait_for_postgres &&
+        python -m sokoweb.sokoweb.create_tables &&
+        uvicorn sokoweb.sokoweb.api:app --host 0.0.0.0 --port ${NODE_PORT} --timeout-keep-alive 120
+      "
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${NODE_PORT}/health"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+
+networks:
+  kademlia_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  node_data:

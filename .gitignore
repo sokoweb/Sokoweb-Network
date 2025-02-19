@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+*.pyc
+
+# Log files
+*.log
+npm-debug.log*
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+#Some files
+api.py
+auth.py
+cli.py
+credit_manager.py
+
