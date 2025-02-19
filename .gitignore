@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
-venv/
+*venv/
 __pycache__/
-
+sokoweb-venv/
+env/
 # Environment files
 .env
 .env.local
@@ -15,7 +16,12 @@ __pycache__/
 dist/
 build/
 *.pyc
-
+*.egg-info/
+*.pyc/
+__pycache__/
+.pytest_cache/
+pytest.init
+.coverage
 # Log files
 *.log
 npm-debug.log*
@@ -29,4 +35,4 @@ api.py
 auth.py
 cli.py
 credit_manager.py
-
+mpesa.py
