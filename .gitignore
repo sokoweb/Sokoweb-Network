@@ -36,3 +36,31 @@ auth.py
 cli.py
 credit_manager.py
 mpesa.py
+setup.py
+
+# Python package files
+*.egg-info/
+*.egg-info/**
+**/sokoweb.egg-info/
+
+# Temporary directories
+**/.sokoweb_temp_dir
+.sokoweb_temp_dir
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test files
+pytest.ini
+.pytest_cache/
+
+# Specific files to ignore
+**/mpesa.py
+
+# Virtual environments
+*venv/
+venv/
+env/
