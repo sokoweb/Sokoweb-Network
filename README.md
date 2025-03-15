@@ -1,37 +1,46 @@
-# SokoWeb
-## Decentralized Commerce Network
+# SokoWeb - Decentralized Commerce Network
 
-A distributed commerce network for peer-to-peer product/service listings, search, and discovery.
+## 🌐 Overview
 
-### 📋 Overview
+SokoWeb is a distributed commerce platform that enables peer-to-peer product and service listings with powerful search and discovery capabilities. Built on decentralized technology, it allows users to create, manage, and discover listings across the network.
 
-SokoWeb enables users to create and discover product listings in a decentralized network, with support for location-based search, image uploads, and credit management.
+## 🚀 Quick Start Guide
 
-### 🚀 Quick Start
+Install and launch SokoWeb with these simple commands:
 
 ```bash
 pip install sokoweb
+
+# Start in interactive mode
 sokoweb-up
-# or for detached mode
+
+# Or start in detached mode
 sokoweb-up -d
 ```
 
-You'll be prompted for:
-- `NODE_PORT` (default: 8000)
-- `NODE_TCP_PORT` (default: 8500)
-- `ADVERTISE_IP` (default: localhost)
+### Configuration
 
-> **Note:** Use a public IP/domain to join the network. Localhost works for exploration but won't connect to other nodes. Tunneling services like Ngrok typically won't work as the network requires UDP and TCP access.
+During startup, you'll be prompted to configure:
 
-### 📋 Requirements
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| NODE_PORT | 8000 | HTTP API port |
+| NODE_TCP_PORT | 8500 | TCP communication port |
+| ADVERTISE_IP | localhost | Your node's public address |
 
-- Python 3.9+
-- Docker 27.3.1+
-- docker compose 2.29.7+
+> **Important:** For full network participation, use a public IP or domain name. Localhost mode works for testing but won't connect to the wider network. Note that tunneling services like Ngrok are not compatible as SokoWeb requires direct UDP and TCP access.
 
-### 🔑 Authentication
+## 💻 System Requirements
 
-#### Register User
+- Python 3.9 or higher
+- Docker 27.3.1 or higher
+- docker compose 2.29.7 or higher
+
+## 📚 API Reference
+
+### Authentication
+
+#### Create a New User Account
 
 ```bash
 curl -X POST http://localhost:8000/register \
@@ -46,7 +55,7 @@ curl -X POST http://localhost:8000/register \
   }'
 ```
 
-#### Get Access Token
+#### Obtain Access Token
 
 ```bash
 curl -X POST http://localhost:8000/token \
@@ -54,16 +63,19 @@ curl -X POST http://localhost:8000/token \
   -d "username=alice&password=alice123&scope=products:write products:read credits:manage"
 ```
 
-Available scopes:
-- `products:write` - Create/modify products
-- `products:read` - View products
-- `credits:manage` - Purchase/manage credits
-- `categories:write` - Suggest categories
-- `categories:read` - View categories
+#### Available Permission Scopes
 
-### 📦 Product Management
+| Scope | Description |
+|-------|-------------|
+| products:write | Create and modify product listings |
+| products:read | View product listings |
+| credits:manage | Purchase and manage account credits |
+| categories:write | Suggest new product categories |
+| categories:read | View available categories |
 
-#### Post Product
+### Product Management
+
+#### Create a New Product Listing
 
 ```bash
 curl -X POST http://localhost:8000/products \
@@ -87,7 +99,7 @@ curl -X POST http://localhost:8000/products \
   }'
 ```
 
-#### Upload Product Image
+#### Upload Product Images
 
 ```bash
 curl -X POST http://localhost:8000/products/{product_id}/image \
@@ -95,42 +107,54 @@ curl -X POST http://localhost:8000/products/{product_id}/image \
   -F "image=@/path/to/image.jpg"
 ```
 
-#### Retrieve Products
+### Product Retrieval
 
-By ID:
+#### Get Product by ID
+
 ```bash
 curl http://localhost:8000/products/{product_id} \
   -H "Authorization: Bearer <your_token>"
 ```
 
-Search by category/shop:
+#### Search by Category or Shop
+
 ```bash
 curl "http://localhost:8000/products?category=Electronics&shop_name=Tech%20Store" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-Search by location (within radius):
+#### Location-Based Search
+
+Find products within a specific radius (in kilometers):
+
 ```bash
 curl "http://localhost:8000/products?latitude=-1.2921&longitude=36.8219&radius_km=10" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-Combined search:
+#### Combined Search Parameters
+
+Combine multiple search criteria for precise results:
+
 ```bash
 curl "http://localhost:8000/products?category=Electronics&latitude=-1.2921&longitude=36.8219&radius_km=5" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-### 🖼️ Image Retrieval
+### Image Retrieval
 
-#### Single Image
+#### Get Primary Product Image
 
 ```bash
 curl "http://localhost:8000/products/{product_id}/image" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-#### All Images (ZIP)
+This endpoint returns the raw image data that can be:
+- Saved directly to a file using curl's `-o` option
+- Viewed in tools like Postman that can render binary responses
+
+#### Download All Product Images
 
 ```bash
 curl "http://localhost:8000/products/{product_id}/images" \
@@ -138,16 +162,18 @@ curl "http://localhost:8000/products/{product_id}/images" \
   --output images_{product_id}.zip
 ```
 
-### 💰 Credits Management
+This endpoint returns a ZIP archive containing all images associated with the product. The response is binary data that should be saved to disk and opened with any ZIP-compatible program.
 
-#### Check Balance
+### Credits System
+
+#### Check Account Balance
 
 ```bash
 curl http://localhost:8000/credits/balance \
   -H "Authorization: Bearer <your_token>"
 ```
 
-#### Purchase Credits
+#### Purchase Additional Credits
 
 ```bash
 curl -X POST http://localhost:8000/credits/purchase \
@@ -159,10 +185,10 @@ curl -X POST http://localhost:8000/credits/purchase \
   }'
 ```
 
-### 📂 Category Operations
+### Category Management
 
 ```bash
-# Suggest a new category
+# Suggest a new product category
 curl -X POST http://<your-public-ip>:8000/categories/suggest \
   -H "Authorization: Bearer <your_token>" \
   -H "Content-Type: application/json" \
@@ -170,22 +196,24 @@ curl -X POST http://<your-public-ip>:8000/categories/suggest \
     "category_name": "Smart Home"
   }'
 
-# Retrieve all categories
+# List all available categories
 curl http://localhost:8000/categories \
   -H "Authorization: Bearer <your_token>"
 ```
 
-> **Note:** Substitute localhost with your Public IP in production.
+> **Note:** When deploying to production, replace `localhost` with your server's public IP address or domain name.
 
-### 🔄 Network Management
+## 🔧 Network Management
 
-- View your containers: `docker ps`
-- Shut down the network: `sokoweb-down`
+Monitor and manage your SokoWeb node:
 
-### 🤝 Contributing
+- View running containers: `docker ps`
+- Shut down your node: `sokoweb-down`
 
-This project is open source and contributions are welcome.
+## 👥 Contributing
 
-### 📄 License
+SokoWeb is an open-source project and welcomes contributions from the community. Feel free to submit issues, feature requests, or pull requests.
 
-MIT License
+## 📄 License
+
+SokoWeb is released under the MIT License.
