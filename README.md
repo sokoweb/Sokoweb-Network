@@ -1,31 +1,37 @@
-# SokoWeb – Decentralized Commerce Network
+# SokoWeb
+## Decentralized Commerce Network
 
 A distributed commerce network for peer-to-peer product/service listings, search, and discovery.
 
-## Quick Start
+### 📋 Overview
+
+SokoWeb enables users to create and discover product listings in a decentralized network, with support for location-based search, image uploads, and credit management.
+
+### 🚀 Quick Start
 
 ```bash
 pip install sokoweb
 sokoweb-up
-or sokoweb-up -d (detached mode)
+# or for detached mode
+sokoweb-up -d
 ```
 
 You'll be prompted for:
-* `NODE_PORT` (default: 8000)
-* `NODE_TCP_PORT` (default: 8500)
-* `ADVERTISE_IP` (default: localhost)
+- `NODE_PORT` (default: 8000)
+- `NODE_TCP_PORT` (default: 8500)
+- `ADVERTISE_IP` (default: localhost)
 
-**Note:** Use public IP/domain to join network. Localhost works for exploration but won't connect. Tunneling services like Ngrok typically won't work as network requires UDP and TCP access.
+> **Note:** Use a public IP/domain to join the network. Localhost works for exploration but won't connect to other nodes. Tunneling services like Ngrok typically won't work as the network requires UDP and TCP access.
 
-## Requirements
+### 📋 Requirements
 
-* Python 3.9+
-* Docker 27.3.1+
-* docker compose 2.29.7+
+- Python 3.9+
+- Docker 27.3.1+
+- docker compose 2.29.7+
 
-## API Examples
+### 🔑 Authentication
 
-### Register User
+#### Register User
 
 ```bash
 curl -X POST http://localhost:8000/register \
@@ -40,7 +46,7 @@ curl -X POST http://localhost:8000/register \
   }'
 ```
 
-### Get Access Token
+#### Get Access Token
 
 ```bash
 curl -X POST http://localhost:8000/token \
@@ -49,13 +55,15 @@ curl -X POST http://localhost:8000/token \
 ```
 
 Available scopes:
-* `products:write` - Create/modify products
-* `products:read` - View products
-* `credits:manage` - Purchase/manage credits
-* `categories:write` - Suggest categories
-* `categories:read` - View categories
+- `products:write` - Create/modify products
+- `products:read` - View products
+- `credits:manage` - Purchase/manage credits
+- `categories:write` - Suggest categories
+- `categories:read` - View categories
 
-### Post Product
+### 📦 Product Management
+
+#### Post Product
 
 ```bash
 curl -X POST http://localhost:8000/products \
@@ -79,7 +87,7 @@ curl -X POST http://localhost:8000/products \
   }'
 ```
 
-### Upload Product Image
+#### Upload Product Image
 
 ```bash
 curl -X POST http://localhost:8000/products/{product_id}/image \
@@ -87,57 +95,42 @@ curl -X POST http://localhost:8000/products/{product_id}/image \
   -F "image=@/path/to/image.jpg"
 ```
 
-### Retrieve Products
+#### Retrieve Products
 
-#### By ID
-
+By ID:
 ```bash
 curl http://localhost:8000/products/{product_id} \
   -H "Authorization: Bearer <your_token>"
 ```
 
-
-#### Search by category/shop
-
+Search by category/shop:
 ```bash
 curl "http://localhost:8000/products?category=Electronics&shop_name=Tech%20Store" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-
-#### Search by location (within radius)
-
+Search by location (within radius):
 ```bash
 curl "http://localhost:8000/products?latitude=-1.2921&longitude=36.8219&radius_km=10" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-
-#### Combined search
-
+Combined search:
 ```bash
 curl "http://localhost:8000/products?category=Electronics&latitude=-1.2921&longitude=36.8219&radius_km=5" \
   -H "Authorization: Bearer <your_token>"
 ```
 
+### 🖼️ Image Retrieval
 
-### Retrieve Product Images
-
-#### 1. Retrieve Single Image
-
-Use this to get the first (or only) associated image of a product:
+#### Single Image
 
 ```bash
 curl "http://localhost:8000/products/{product_id}/image" \
   -H "Authorization: Bearer <your_token>"
 ```
 
-* Returns the raw bytes of the image (e.g., "image/png" if PNG)
-* You can save/open it directly as an image file if you use a tool like curl with "-o" or Postman's "Save Response"
-
-#### 2. Retrieve All Images (Multi-Image ZIP)
-
-Use this to get all images for a product in a single ZIP file:
+#### All Images (ZIP)
 
 ```bash
 curl "http://localhost:8000/products/{product_id}/images" \
@@ -145,10 +138,7 @@ curl "http://localhost:8000/products/{product_id}/images" \
   --output images_{product_id}.zip
 ```
 
-* Responds with a ZIP file (the beginning bytes are "PK", indicating a .zip)
-* If you simply view the response as text, you'll see nonsense characters (binary contents). Instead, save it to disk (e.g., --output in curl) and then open with any ZIP program. You'll find all images included in that archive
-
-### Credits Management
+### 💰 Credits Management
 
 #### Check Balance
 
@@ -169,10 +159,10 @@ curl -X POST http://localhost:8000/credits/purchase \
   }'
 ```
 
-### Category Operations
+### 📂 Category Operations
 
 ```bash
-# Suggest a new category (only works in production)
+# Suggest a new category
 curl -X POST http://<your-public-ip>:8000/categories/suggest \
   -H "Authorization: Bearer <your_token>" \
   -H "Content-Type: application/json" \
@@ -185,17 +175,17 @@ curl http://localhost:8000/categories \
   -H "Authorization: Bearer <your_token>"
 ```
 
-**Note:** Substitute localhost with your Public IP in production. The same applies for port, if it's different in your case.
+> **Note:** Substitute localhost with your Public IP in production.
 
-## Network Management
+### 🔄 Network Management
 
-* View your containers: `docker ps`
-* Shut down the network: `sokoweb-down`
+- View your containers: `docker ps`
+- Shut down the network: `sokoweb-down`
 
-## Contributing
+### 🤝 Contributing
 
 This project is open source and contributions are welcome.
 
-## License
+### 📄 License
 
 MIT License
