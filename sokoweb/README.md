@@ -1,4 +1,4 @@
-# SokoWeb - Decentralized Commerce Network
+# SokoWeb - Decentralized Open Commerce Network
 
 ## 🌐 Overview
 
