@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Upgrade pip first, then install sokoweb
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir sokoweb==0.1.42
+    pip install --no-cache-dir sokoweb==0.1.48
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
