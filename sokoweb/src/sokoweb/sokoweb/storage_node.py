@@ -6,35 +6,23 @@ from .storage_service import StorageService
 from .messages import Message
 import logging
 import json
+from .proof_of_bandwidth import ProofOfBandwidthManager
 
 logger = logging.getLogger(__name__)
 
 class StorageNode(Node):
-    def __init__(
-        self,
-        ip,
-        port,
-        key_pair=None,
-        node_id=None,
-        advertise_ip=None,
-        alpha=3,
-        k=20,
-        credit_manager=None,
-        storage_dir="storage_chunks",
-        cleanup_interval=60,
-        republish_interval=3600,
-        tcp_port=None,
-    ):
-        super().__init__(
-            ip=ip,
-            port=port,
-            key_pair=key_pair,
-            node_id=node_id,
-            advertise_ip=advertise_ip,
-            alpha=alpha,
-            k=k,
-            credit_manager=credit_manager,
-        )
+    def __init__(self, ip, port, key_pair=None, node_id=None, advertise_ip=None,
+                 alpha=3, k=20, credit_manager=None, storage_dir="storage_chunks",
+                 cleanup_interval=60, republish_interval=3600, tcp_port=None):
+        # Call the superclass initializer
+        super().__init__(ip=ip,
+                         port=port,
+                         key_pair=key_pair,
+                         node_id=node_id,
+                         advertise_ip=advertise_ip,
+                         alpha=alpha,
+                         k=k,
+                         credit_manager=credit_manager)
         self.tcp_port = tcp_port or (self.port + 500)
         self.tcp_server = None
         self.storage_service = StorageService(
@@ -43,7 +31,13 @@ class StorageNode(Node):
             cleanup_interval=cleanup_interval,
             republish_interval=republish_interval,
         )
-        logger.info(f"Initialized StorageNode at {self.ip}:{self.port} with TCP port {self.tcp_port}")
+        # Initialize the proof-of-bandwidth manager
+        self.proof_of_bandwidth_manager = ProofOfBandwidthManager(
+            self,
+            credit_manager,
+            reward_rate=1e-6  # Adjust the reward rate as needed
+        )
+        self.logger.info(f"Initialized StorageNode at {self.ip}:{self.port} with TCP port {self.tcp_port}")
 
     async def start(self, bootstrap_nodes=None):
         await self.start_tcp_server()

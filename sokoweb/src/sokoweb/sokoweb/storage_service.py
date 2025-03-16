@@ -451,6 +451,19 @@ class StorageService:
                 )
 
     async def send_file_over_tcp(self, node, file_hash, file_data, ttl):
+        """
+        Sends a file to a remote node over TCP. If the file data is sent successfully,
+        a proof-of-bandwidth is generated so that the serving node can earn credits.
+
+        Args:
+            node: Remote node to which the file will be sent.
+            file_hash: The SHA-256 hash of the file data.
+            file_data: The file's bytes.
+            ttl: Time-to-live for stored file data.
+
+        Returns:
+            bool: True if the file transfer was acknowledged successfully, False otherwise.
+        """
         try:
             reader, writer = await asyncio.open_connection(node.ip, node.tcp_port)
             message = {
@@ -459,14 +472,17 @@ class StorageService:
                 "file_size": len(file_data),
                 "ttl": ttl,
             }
-            msg = json.dumps(message).encode("utf-8")
-            msg_len = len(msg).to_bytes(4, byteorder="big")
-            writer.write(msg_len + msg)
+            msg_json = json.dumps(message).encode("utf-8")
+            msg_len = len(msg_json).to_bytes(4, byteorder="big")
+            writer.write(msg_len + msg_json)
             await writer.drain()
 
             file_len = len(file_data).to_bytes(8, byteorder="big")
             writer.write(file_len + file_data)
             await writer.drain()
+
+            # Generate a unique session id (using file hash and remote node's id)
+            session_id = f"{file_hash}_{node.node_id}"
 
             try:
                 resp_len_data = await asyncio.wait_for(reader.readexactly(4), timeout=30)
@@ -474,7 +490,13 @@ class StorageService:
                 resp_data = await reader.readexactly(resp_len)
                 resp = json.loads(resp_data.decode("utf-8"))
                 if resp.get("status") == "OK":
-                    self.logger.info(f"File {file_hash} sent successfully to {node.node_id}")
+                    self.logger.info(f"File {file_hash} sent successfully to node {node.node_id}")
+
+                    # Generate and verify (award) proof of bandwidth.
+                    if hasattr(self.node, "proof_of_bandwidth_manager"):
+                        proof = await self.node.proof_of_bandwidth_manager.generate_proof(session_id, len(file_data))
+                        await self.node.proof_of_bandwidth_manager.verify_and_award(proof)
+
                     return True
                 else:
                     self.logger.error(
@@ -485,17 +507,17 @@ class StorageService:
                 self.logger.error(f"Timeout waiting for ack from node {node.node_id}")
                 return False
             except asyncio.IncompleteReadError as e:
-                self.logger.error(f"Incomplete read waiting for ack from {node.node_id}: {e}")
+                self.logger.error(f"Incomplete read waiting for ack from node {node.node_id}: {e}")
                 return False
         except Exception as e:
-            self.logger.error(f"Error sending file to node {node.node_id}: {e}", exc_info=True)
+            self.logger.error(f"Error sending file {file_hash} to node {node.node_id}: {e}", exc_info=True)
             return False
         finally:
             writer.close()
             try:
                 await writer.wait_closed()
-            except:
-                pass
+            except Exception:
+                self.logger.warning("Error waiting for TCP writer to close.")
 
     async def retrieve_file_from_network(self, file_hash: str) -> bytes:
         file_path = os.path.join(self.storage_dir, file_hash)

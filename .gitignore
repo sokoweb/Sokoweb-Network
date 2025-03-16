@@ -37,6 +37,9 @@ cli.py
 credit_manager.py
 mpesa.py
 setup.py
+marketplace.py
+debug.py
+proof_of_bandwidth.py
 
 # Python package files
 *.egg-info/
@@ -64,3 +67,4 @@ pytest.ini
 *venv/
 venv/
 env/
+sokoweb-venv/
