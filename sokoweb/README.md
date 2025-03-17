@@ -1,4 +1,4 @@
-# SokoWeb - Decentralized Open Commerce Network
+# SokoWeb - Decentralized Commerce Network
 
 ## 🌐 Overview
 
@@ -184,6 +184,44 @@ curl -X POST http://localhost:8000/credits/purchase \
     "phone_number": "+254712345678"
   }'
 ```
+
+### Marketplace
+
+The marketplace allows node operators to sell earned credits to other users.
+
+#### List All Available Credit Offers
+
+```bash
+curl http://localhost:8000/market/offers \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### Create a New Credit Sale Offer
+
+```bash
+curl -X POST http://localhost:8000/market/offer \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 50,
+    "price_per_credit": 1
+  }'
+```
+
+> **Note:** Only credits beyond the free threshold (100 credits) can be sold.
+
+#### Purchase Credits from an Offer
+
+```bash
+curl -X POST http://localhost:8000/market/buy/{offer_id} \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+254712345678"
+  }'
+```
+
+This initiates an M-Pesa STK push payment. Once the payment is confirmed, credits are transferred from the seller to the buyer.
 
 ### Category Management
 
